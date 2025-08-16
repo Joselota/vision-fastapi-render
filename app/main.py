@@ -10,7 +10,13 @@ import base64, binascii
 class ImageB64(BaseModel):
     image_b64: str  # imagen en base64 (sin saltos de línea)
 
-app = FastAPI(title="Vision API", version="0.1.0")
+app = FastAPI(
+    title="Vision API",
+    version="1.0.0",            
+    description="Clasificador de insectos (Bee, Ant, Butterfly, Ladybug).",
+    docs_url="/",               
+    redoc_url=None
+)
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
