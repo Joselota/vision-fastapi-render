@@ -113,14 +113,38 @@ Si pasas 1 o 2 imágenes, el script reutiliza la primera para completar 3 llamad
 
 En plan free hay cold starts (la primera petición tras inactividad puede tardar algunos segundos).
 
-🧾 Ejemplos con Postman
+# 🧪 Uso con Postman
+1) POST /predict (multipart/form-data)
 
-POST /predict
-Body → form-data → key file (tipo File), valor: la imagen.
+ * Método POST, URL: https://vision-api-ml.onrender.com/predict
+ * Pestaña Body → selecciona form-data.
+ * En la tabla agrega una fila:
+   - Key: file
+   - Type: File (no Text)
+   - Value: elige tu imagen .jpg/.png
+ * No agregues Content-Type manualmente (Postman lo pone solo).
+ * Envía.
+   Respuesta esperada (ejemplo):
+        {
+        "label": "Ant",
+        "proba": {
+            "Bee": 0.0663,
+            "Ant": 0.5208,
+            "Butterfly": 0.2745,
+            "Ladybug": 0.1384
+        },
+        "model_version": "1.0.0"
+        }
+2) POST /predict_json (JSON con imagen en base64)
 
-POST /predict_json
-Body → raw → JSON → pega:
-{ "image_b64": "AAA...<tu base64>...BBB" }
+* Método POST, URL: https://vision-api-ml.onrender.com/predict_json
+* Body → raw → selecciona JSON.
+* Pega un JSON como este (reemplaza el valor por tu base64 en una sola línea):
+    { "image_b64": "AAA...TU_BASE64...BBB" }
+* En mac/linux puedes generar el base64 así:
+    base64 -i /ruta/a/imagen.jpg | tr -d '\n' > img.b64
+    Copia el contenido de img.b64 y pégalo en image_b64.
+    Nota: Suele fallar cuando el base64 tiene saltos de línea; por eso el tr -d '\n'.
 
 
 🔒 Validaciones y manejo de errores
