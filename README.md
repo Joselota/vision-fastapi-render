@@ -94,11 +94,50 @@ Ejecutar el servidor localmente
     uvicorn app.main:app --reload
     # Abrir http://127.0.0.1:8000/docs
 
-🧪 Cliente externo (3 requests)
-    python client.py --url http://127.0.0.1:8000 img1.jpg img2.jpg img3.jpg
-    # o contra Render:
-    python client.py --url https://vision-api-ml.onrender.com img1.jpg img2.jpg img3.jpg
-Si pasas 1 o 2 imágenes, el script reutiliza la primera para completar 3 llamadas.
+## 🧪 Cliente externo (3 peticiones)
+
+El script `client.py` (sin dependencias extra) realiza **tres requests** a la API:
+1) `/predict` (multipart/form-data) con imagen A  
+2) `/predict` (multipart/form-data) con imagen B  
+3) `/predict_json` (JSON con la imagen en base64) con imagen C
+
+Salida esperada (ejemplo real)
+    --- Request #1 — /predict (multipart) ---
+    Enviando: 632185ec7f925c3d.jpg | 104652 B | image/jpeg | sha16=747798eae00f2154
+    Status: 200 | 14528.7 ms
+    {
+    "label": "Butterfly",
+    "proba": { "Bee": 0.1013, "Ant": 0.3185, "Butterfly": 0.3660, "Ladybug": 0.2141 },
+    "model_version": "1.0.0"
+    }
+
+    --- Request #2 — /predict (multipart) ---
+    Enviando: 4827d395bbb69e38.jpg | 173863 B | image/jpeg | sha16=1b9959fd7982db36
+    Status: 200 | 1532.9 ms
+    {
+    "label": "Ant",
+    "proba": { "Bee": 0.0003, "Ant": 0.9981, "Butterfly": 0.0002, "Ladybug": 0.0014 },
+    "model_version": "1.0.0"
+    }
+
+    --- Request #3 — /predict_json (JSON base64) ---
+    Enviando: a41d46815d597df0.jpg | 299154 B | image/jpeg | sha16=53dfed114df10513
+    (longitud base64: 398872 chars)
+    Status: 200 | 1731.8 ms
+    {
+    "label": "Ladybug",
+    "proba": { "Bee": 0.0304, "Ant": 0.2734, "Butterfly": 0.0036, "Ladybug": 0.6926 },
+    "model_version": "1.0.0"
+    }
+    El archivo resultados_cliente.json queda en el directorio actual con el resumen de las 3 llamadas (inputs, tiempos, outputs).
+
+### Cómo ejecutarlo
+```bash
+python client.py IMG1.jpg IMG2.jpg IMG3.jpg \
+  --url https://vision-api-ml.onrender.com \
+  --out resultados_cliente.json
+Si pasas 1 o 2 imágenes, el script repite la primera para completar 3 solicitudes.
+
 
 ☁️ Despliegue en Render
 * Este repo incluye requirements.txt y runtime.txt (3.11.9).
