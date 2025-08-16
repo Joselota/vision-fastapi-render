@@ -1,13 +1,23 @@
 # app/main.py
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import Request, FastAPI, File, UploadFile, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from .inference import predict_bytes, MODEL_VERSION
 from pydantic import BaseModel
 import base64, binascii
+
 
 class ImageB64(BaseModel):
     image_b64: str  # imagen en base64 (sin saltos de línea)
 
 app = FastAPI(title="Vision API", version="0.1.0")
+
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+templates = Jinja2Templates(directory="app/templates")
+
+@app.get("/", include_in_schema=False)
+def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 @app.get("/health")
 def health():
