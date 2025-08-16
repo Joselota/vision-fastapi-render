@@ -114,12 +114,12 @@ pip install -r requirements.txt
 |   POST | `/predict_json` | Predicción vía **JSON** con imagen en **base64** |
 
 Esquema predict_json
-{
+```{
   "image_b64": "<cadena base64 de la imagen>"
-}
+}```
 
 Respuesta típica: 
-{
+```{
   "label": "Ant",
   "proba": {
     "Bee": 0.01,
@@ -128,19 +128,20 @@ Respuesta típica:
     "Ladybug": 0.01
   },
   "model_version": "1.0.0"
-}
+}```
 
 ## 5) Cómo probar (curl / Postman)
 
-curl — multipart
+```curl — multipart
 
 curl -sS -X POST https://vision-api-ml.onrender.com/predict \
   -H "accept: application/json" \
   -F "file=@ruta/a/tu_imagen.jpg"
 
 curl — JSON/base64 con Python estándar
+```
 
-python - <<'PY'
+```python - <<'PY'
 import base64, json, pathlib, urllib.request
 img = "ruta/a/tu_imagen.jpg"
 b64 = base64.b64encode(pathlib.Path(img).read_bytes()).decode()
@@ -150,7 +151,7 @@ req = urllib.request.Request(
     headers={"Content-Type": "application/json"}
 )
 print(urllib.request.urlopen(req, timeout=60).read().decode())
-PY
+PY```
 
 Postman
 
