@@ -3,7 +3,7 @@
 Servicio web que expone un modelo de clasificación de insectos como API REST usando FastAPI.
 La API está desplegada en Render y entrega predicciones a partir de una imagen (JPEG/PNG), ya sea vía multipart/form-data o JSON (imagen en base64).
 
-URL pública: https://vision-api-ml.onrender.com
+URL pública: https://vision-api-ml.onrender.com/
 
 👀 Demo rápido
 # Salud del servicio
