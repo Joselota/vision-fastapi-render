@@ -15,19 +15,19 @@ modelo y un cliente externo para pruebas.
 
 
 👀 Demo rápido
-# Salud del servicio
+### Salud del servicio
 curl -sS https://vision-api-ml.onrender.com/health
 
-# Metadata del modelo (versión y clases)
+### Metadata del modelo (versión y clases)
 curl -sS https://vision-api-ml.onrender.com/metadata
 
-# Predicción (multipart/form-data)
+### Predicción (multipart/form-data)
 curl -sS -X POST "https://vision-api-ml.onrender.com/predict" \
   -H "accept: application/json" \
   -H "Content-Type: multipart/form-data" \
   -F "file=@/ruta/a/imagen.jpg"
 
-# Predicción (JSON: imagen en base64)
+### Predicción (JSON: imagen en base64)
 base64 -i /ruta/a/imagen.jpg | tr -d '\n' > img.b64
 curl -sS -X POST "https://vision-api-ml.onrender.com/predict_json" \
   -H "Content-Type: application/json" \
@@ -35,17 +35,19 @@ curl -sS -X POST "https://vision-api-ml.onrender.com/predict_json" \
 
 
 ## 1) Estructura del repositorio
+```
 .
 ├─ app/
-│  ├─ main.py            # FastAPI (endpoints /health, /predict, /predict_json, /metadata)
-│  └─ inference.py       # Carga del modelo y lógica de preprocesamiento/predicción
+│  ├─ main.py              # FastAPI (/health, /predict, /predict_json, /metadata)
+│  └─ inference.py         # Carga del modelo y preprocesamiento/predicción
 ├─ models/
-│  ├─ modelo.h5          # Modelo entrenado (TensorFlow/Keras)
-│  └─ classes.json       # Mapeo índice → nombre de clase
-├─ client.py             # Cliente externo con 3 requests de ejemplo
-├─ requirements.txt      # Dependencias para Linux/Render
-├─ runtime.txt           # Versión de Python para Render (3.11.9)
+│  ├─ modelo.h5            # Modelo entrenado (TensorFlow/Keras)
+│  └─ classes.json         # Mapeo índice → nombre de clase
+├─ client.py               # Cliente externo con 3 requests de ejemplo
+├─ requirements.txt        # Dependencias para Linux/Render
+├─ runtime.txt             # Versión de Python para Render (p.ej. 3.11.9)
 └─ README.md
+```
 
 
 ## 2) Modelo
