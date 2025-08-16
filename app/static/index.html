@@ -1,0 +1,16 @@
+<!doctype html><meta charset="utf-8">
+<title>Vision API · Demo</title>
+<h1>🐞 Vision API</h1>
+<p><a href="/docs">/docs</a> · <a href="/metadata">/metadata</a> · <a href="/health">/health</a></p>
+<input type="file" id="f"><button id="b">Enviar</button>
+<pre id="o">—</pre>
+<script>
+b.onclick=async()=>{
+  const f=document.getElementById('f').files[0];
+  if(!f){o.textContent='Elige una imagen';return;}
+  const fd=new FormData(); fd.append('file',f);
+  o.textContent='Procesando...';
+  const r=await fetch('/predict',{method:'POST',body:fd});
+  o.textContent=JSON.stringify(await r.json(),null,2);
+};
+</script>

@@ -19,12 +19,21 @@ app = FastAPI(
     redoc_url=None
 )
 
+BASE_DIR = Path(__file__).resolve().parent
+STATIC_DIR = BASE_DIR / "static"
+
+if STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
 
 @app.get("/", include_in_schema=False)
-def root():
-    # Redirige la raíz a Swagger
+def home():
+    index = STATIC_DIR / "index.html"
+    if index.exists():
+        return FileResponse(index)
+    # Fallback elegante si borro el index por error
     return RedirectResponse(url="/docs", status_code=307)
 
 @app.get("/health")
