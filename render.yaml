@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: vision-api-ml
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -k uvicorn.workers.UvicornWorker -b 0.0.0.0:$PORT app.main:app
+    envVars:
+      - key: MODEL_PATH
+        value: models/modelo.h5
+      - key: CLASSES_PATH
+        value: models/classes.json
+      - key: MODEL_VERSION
+        value: "1.0.0"
