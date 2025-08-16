@@ -1,45 +1,31 @@
 # app/main.py
-from fastapi import Request, FastAPI, File, UploadFile, HTTPException
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from fastapi.responses import RedirectResponse, FileResponse
-from .inference import predict_bytes, MODEL_VERSION
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
-import base64, binascii
+from .inference import predict_bytes, MODEL_VERSION
+
+import base64, binascii, json
 from pathlib import Path
 
-
-class ImageB64(BaseModel):
-    image_b64: str  # imagen en base64 (sin saltos de línea)
-
+# -------- App --------
 app = FastAPI(
     title="Vision API",
-    version="1.0.0",            
+    version=MODEL_VERSION,  # o "1.0.0" si prefieres fijo
     description="Clasificador de insectos (Bee, Ant, Butterfly, Ladybug).",
-    docs_url="/docs",               
-    redoc_url=None
 )
 
-BASE_DIR = Path(__file__).resolve().parent
-STATIC_DIR = BASE_DIR / "static"
-
-if STATIC_DIR.exists():
-    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
-
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-templates = Jinja2Templates(directory="app/templates")
-
+# Raíz: redirige a Swagger
 @app.get("/", include_in_schema=False)
-def home():
-    index = STATIC_DIR / "index.html"
-    if index.exists():
-        return FileResponse(index)
-    # Fallback elegante si borro el index por error
+def root():
     return RedirectResponse(url="/docs", status_code=307)
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+# -------- Endpoints de predicción --------
+class ImageB64(BaseModel):
+    image_b64: str  # imagen en base64 (sin saltos de línea)
 
 @app.post("/predict")
 async def predict(file: UploadFile = File(..., description="Imagen a clasificar")):
@@ -52,19 +38,23 @@ async def predict(file: UploadFile = File(..., description="Imagen a clasificar"
         raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error procesando imagen: {e}")
-    
+
 @app.post("/predict_json")
 def predict_json(body: ImageB64):
     try:
         content = base64.b64decode(body.image_b64.encode("utf-8"), validate=True)
-        return predict_bytes(content)  # reutilizamos tu lógica de inferencia
+        return predict_bytes(content)
     except binascii.Error as e:
         raise HTTPException(status_code=400, detail=f"base64 inválido: {e}")
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error procesando imagen: {e}")
-    
+
+# -------- Metadata (ruta segura al classes.json) --------
+ROOT_DIR = Path(__file__).resolve().parent.parent  # .../ (raíz del repo)
+CLASSES_PATH = ROOT_DIR / "models" / "classes.json"
+
 @app.get("/metadata")
 def metadata():
-    d = json.loads(open("models/classes.json","r",encoding="utf-8").read())
-    classes = [v for k, v in sorted(d.items(), key=lambda kv: int(kv[0]))]
+    data = json.loads(CLASSES_PATH.read_text(encoding="utf-8"))
+    classes = [v for k, v in sorted(data.items(), key=lambda kv: int(kv[0]))]
     return {"model_version": MODEL_VERSION, "num_classes": len(classes), "classes": classes}
