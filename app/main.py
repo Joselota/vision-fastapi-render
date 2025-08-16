@@ -6,6 +6,7 @@ from fastapi.responses import RedirectResponse
 from .inference import predict_bytes, MODEL_VERSION
 from pydantic import BaseModel
 import base64, binascii
+from pathlib import Path
 
 
 class ImageB64(BaseModel):
