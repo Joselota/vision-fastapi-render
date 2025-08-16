@@ -93,17 +93,16 @@ Esquema de salida (ambos endpoints)
 
 Requisitos: Python 3.11 (recomendado 3.11.9). En Windows, usar WSL2 facilita TensorFlow.
 ### a) crear y activar entorno
-python3.11 -m venv .venv
-source .venv/bin/activate                  # en Windows: .venv\Scripts\activate
-python -m pip install -U pip setuptools wheel
+* python3.11 -m venv .venv
+* source .venv/bin/activate                  # en Windows: .venv\Scripts\activate
+* python -m pip install -U pip setuptools wheel
 
 ### b) instalar dependencias
 pip install -r requirements.txt
 
 ### c) levantar servidor
-uvicorn app.main:app --reload
- abrir: http://127.0.0.1:8000/docs
-
+>uvicorn app.main:app --reload
+> abrir: http://127.0.0.1:8000/docs
 
 
 ## 4) Endpoints
