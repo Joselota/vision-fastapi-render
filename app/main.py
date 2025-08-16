@@ -2,7 +2,7 @@
 from fastapi import Request, FastAPI, File, UploadFile, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 from .inference import predict_bytes, MODEL_VERSION
 from pydantic import BaseModel
 import base64, binascii
