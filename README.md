@@ -1,9 +1,18 @@
 # Despliegue de un modelo de ML como API (FastAPI + TensorFlow)
 
-Servicio web que expone un modelo de clasificación de insectos como API REST usando FastAPI.
-La API está desplegada en Render y entrega predicciones a partir de una imagen (JPEG/PNG), ya sea vía multipart/form-data o JSON (imagen en base64).
+Clasificador de insectos (Bee, Ant, Butterfly, Ladybug) expuesto como servicio web.
+Incluye dos formas de inferencia (archivo y JSON/base64), healthcheck, metadatos del
+modelo y un cliente externo para pruebas.
 
-URL pública: https://vision-api-ml.onrender.com/
+> **API pública en Render:**  
+> https://vision-api-ml.onrender.com  
+> **Documentación Swagger:**  
+> https://vision-api-ml.onrender.com/docs
+
+> ⚠️ Nota (plan gratuito de Render): la **primera** petición puede tardar unos
+> segundos porque la instancia “despierta”. Recomendado llamar primero a
+> `/health` y luego a `/predict`.
+
 
 👀 Demo rápido
 # Salud del servicio
@@ -25,7 +34,7 @@ curl -sS -X POST "https://vision-api-ml.onrender.com/predict_json" \
   -d "{\"image_b64\":\"$(cat img.b64)\"}"
 
 
-📦 Estructura del repositorio
+## 1) Estructura del repositorio
 .
 ├─ app/
 │  ├─ main.py            # FastAPI (endpoints /health, /predict, /predict_json, /metadata)
@@ -39,7 +48,7 @@ curl -sS -X POST "https://vision-api-ml.onrender.com/predict_json" \
 └─ README.md
 
 
-🧠 Modelo
+## 2) Modelo
 
 * Formato: models/modelo.h5 (Keras).
 * Salida: vector de probabilidades sobre 4 clases (según models/classes.json):
@@ -77,29 +86,86 @@ Esquema de salida (ambos endpoints)
   "model_version": "1.0.0"
 }
 
-🛠️ Instalación local
+## 3) Instalación y ejecución local
 
-Requisitos:
-* Python 3.11 (recomendado 3.11.9)
-* macOS / Linux / WSL2 (Windows con WSL sufre menos con TensorFlow)
-    # 1) crear y activar entorno
-    python3.11 -m venv .venv
-    source .venv/bin/activate
-    python -m pip install -U pip
+Requisitos: Python 3.11 (recomendado 3.11.9). En Windows, usar WSL2 facilita TensorFlow.
+### a) crear y activar entorno
+python3.11 -m venv .venv
+source .venv/bin/activate                  # en Windows: .venv\Scripts\activate
+python -m pip install -U pip setuptools wheel
 
-    # 2) instalar dependencias
-    pip install -r requirements.txt
+### b) instalar dependencias
+pip install -r requirements.txt
 
-Ejecutar el servidor localmente
-    uvicorn app.main:app --reload
-    # Abrir http://127.0.0.1:8000/docs
+### c) levantar servidor
+uvicorn app.main:app --reload
+ abrir: http://127.0.0.1:8000/docs
 
-## 🧪 Cliente externo (3 peticiones)
 
-El script `client.py` (sin dependencias extra) realiza **tres requests** a la API:
-1) `/predict` (multipart/form-data) con imagen A  
-2) `/predict` (multipart/form-data) con imagen B  
-3) `/predict_json` (JSON con la imagen en base64) con imagen C
+
+## 4) Endpoints
+| Método | Ruta            | Descripción                                      |
+| -----: | --------------- | ------------------------------------------------ |
+|    GET | `/health`       | Healthcheck (`{"status":"ok"}`)                  |
+|    GET | `/metadata`     | Versión y clases del modelo                      |
+|   POST | `/predict`      | Predicción vía **multipart/form-data** (`file`)  |
+|   POST | `/predict_json` | Predicción vía **JSON** con imagen en **base64** |
+
+Esquema predict_json
+{
+  "image_b64": "<cadena base64 de la imagen>"
+}
+
+Respuesta típica: 
+{
+  "label": "Ant",
+  "proba": {
+    "Bee": 0.01,
+    "Ant": 0.98,
+    "Butterfly": 0.00,
+    "Ladybug": 0.01
+  },
+  "model_version": "1.0.0"
+}
+
+## 5) Cómo probar (curl / Postman)
+
+curl — multipart
+
+curl -sS -X POST https://vision-api-ml.onrender.com/predict \
+  -H "accept: application/json" \
+  -F "file=@ruta/a/tu_imagen.jpg"
+
+curl — JSON/base64 con Python estándar
+
+python - <<'PY'
+import base64, json, pathlib, urllib.request
+img = "ruta/a/tu_imagen.jpg"
+b64 = base64.b64encode(pathlib.Path(img).read_bytes()).decode()
+req = urllib.request.Request(
+    "https://vision-api-ml.onrender.com/predict_json",
+    data=json.dumps({"image_b64": b64}).encode(),
+    headers={"Content-Type": "application/json"}
+)
+print(urllib.request.urlopen(req, timeout=60).read().decode())
+PY
+
+Postman
+
+1. POST https://vision-api-ml.onrender.com/predict
+2. Body → form-data
+   - Key: file (Type: File), Value: tu .jpg/.png
+3. No agregues manualmente Content-Type; Postman lo pone.
+4. Send → 200 con el JSON de predicción.
+
+
+## 6) Cliente externo (client.py) — 3 peticiones
+
+Hace 3 requests distintos (2× /predict + 1× /predict_json) y guarda un resumen en resultados_cliente.json.
+
+    python client.py IMG1.jpg IMG2.jpg IMG3.jpg \
+    --url https://vision-api-ml.onrender.com \
+    --out resultados_cliente.json
 
 Salida esperada (ejemplo real)
     --- Request #1 — /predict (multipart) ---
@@ -131,15 +197,22 @@ Salida esperada (ejemplo real)
     }
     El archivo resultados_cliente.json queda en el directorio actual con el resumen de las 3 llamadas (inputs, tiempos, outputs).
 
-### Cómo ejecutarlo
-```bash
-python client.py IMG1.jpg IMG2.jpg IMG3.jpg \
-  --url https://vision-api-ml.onrender.com \
-  --out resultados_cliente.json
-Si pasas 1 o 2 imágenes, el script repite la primera para completar 3 solicitudes.
+    ### Cómo ejecutarlo
+    python client.py IMG1.jpg IMG2.jpg IMG3.jpg \
+    --url https://vision-api-ml.onrender.com \
+    --out resultados_cliente.json
+    Si pasas 1 o 2 imágenes, el script repite la primera para completar 3 solicitudes.
 
+## 7) Despliegue en Render
 
-☁️ Despliegue en Render
+* URL del servicio: https://vision-api-ml.onrender.com
+* Documentación: https://vision-api-ml.onrender.com/docs
+
+Config clave:
+* Start command: gunicorn -k uvicorn.workers.UvicornWorker -w 1 -b 0.0.0.0:$PORT app.main:app --timeout 120
+* Python: runtime.txt (p.ej. 3.11.9)
+* Auto-Deploy: ON (o Manual → Deploy latest commit)
+
 * Este repo incluye requirements.txt y runtime.txt (3.11.9).
 * Comandos de Render:
    - Build: pip install -r requirements.txt
@@ -152,41 +225,41 @@ Si pasas 1 o 2 imágenes, el script repite la primera para completar 3 solicitud
 
 En plan free hay cold starts (la primera petición tras inactividad puede tardar algunos segundos).
 
-# 🧪 Uso con Postman
-1) POST /predict (multipart/form-data)
+## 8) Uso con Postman
+    1) POST /predict (multipart/form-data)
 
- * Método POST, URL: https://vision-api-ml.onrender.com/predict
- * Pestaña Body → selecciona form-data.
- * En la tabla agrega una fila:
-   - Key: file
-   - Type: File (no Text)
-   - Value: elige tu imagen .jpg/.png
- * No agregues Content-Type manualmente (Postman lo pone solo).
- * Envía.
-   Respuesta esperada (ejemplo):
-        {
-        "label": "Ant",
-        "proba": {
-            "Bee": 0.0663,
-            "Ant": 0.5208,
-            "Butterfly": 0.2745,
-            "Ladybug": 0.1384
-        },
-        "model_version": "1.0.0"
-        }
-2) POST /predict_json (JSON con imagen en base64)
+    * Método POST, URL: https://vision-api-ml.onrender.com/predict
+    * Pestaña Body → selecciona form-data.
+    * En la tabla agrega una fila:
+    - Key: file
+    - Type: File (no Text)
+    - Value: elige tu imagen .jpg/.png
+    * No agregues Content-Type manualmente (Postman lo pone solo).
+    * Envía.
+    Respuesta esperada (ejemplo):
+            {
+            "label": "Ant",
+            "proba": {
+                "Bee": 0.0663,
+                "Ant": 0.5208,
+                "Butterfly": 0.2745,
+                "Ladybug": 0.1384
+            },
+            "model_version": "1.0.0"
+            }
+    2) POST /predict_json (JSON con imagen en base64)
 
-* Método POST, URL: https://vision-api-ml.onrender.com/predict_json
-* Body → raw → selecciona JSON.
-* Pega un JSON como este (reemplaza el valor por tu base64 en una sola línea):
-    { "image_b64": "AAA...TU_BASE64...BBB" }
-* En mac/linux puedes generar el base64 así:
-    base64 -i /ruta/a/imagen.jpg | tr -d '\n' > img.b64
-    Copia el contenido de img.b64 y pégalo en image_b64.
-    Nota: Suele fallar cuando el base64 tiene saltos de línea; por eso el tr -d '\n'.
+    * Método POST, URL: https://vision-api-ml.onrender.com/predict_json
+    * Body → raw → selecciona JSON.
+    * Pega un JSON como este (reemplaza el valor por tu base64 en una sola línea):
+        { "image_b64": "AAA...TU_BASE64...BBB" }
+    * En mac/linux puedes generar el base64 así:
+        base64 -i /ruta/a/imagen.jpg | tr -d '\n' > img.b64
+        Copia el contenido de img.b64 y pégalo en image_b64.
+        Nota: Suele fallar cuando el base64 tiene saltos de línea; por eso el tr -d '\n'.
 
 
-🔒 Validaciones y manejo de errores
+## 9) Validaciones y manejo de errores
 
 * 400 – Formato no soportado: si el archivo no es JPG/PNG.
 * 400 – base64 inválido: si el JSON trae base64 malformado.
@@ -195,9 +268,10 @@ En plan free hay cold starts (la primera petición tras inactividad puede tardar
 
 Mensajes de error devuelven detail legible para facilitar el diagnóstico.
 
-🧩 Notas técnicas
+## 10) Notas técnicas
 * TensorFlow/keras probados en Python 3.11 (Render usa runtime.txt para fijar versión).
 * Si modelo.h5 superara 100 MB, usa Git LFS para subirlo.
 
-📄 Licencia
+## 11) Licencia
+Proyecto académico — Magíster. Autor: Ingrid Solís González.
 Este proyecto es educativo y forma parte de una tarea de despliegue de servicios de ML. Úsalo como referencia bajo el contexto académico correspondiente.
