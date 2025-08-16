@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Vision API · Demo</title>
+  <link rel="icon" href="data:,">
+  <style>
+    body{font-family:ui-sans-serif,system-ui;max-width:820px;margin:40px auto;padding:0 16px;}
+    header{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .card{border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin:12px 0;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+    button{padding:10px 14px;border-radius:10px;border:1px solid #111;cursor:pointer}
+    #out{white-space:pre-wrap;background:#0b1020;color:#d1e7ff;padding:12px;border-radius:10px;overflow:auto}
+    small{color:#6b7280}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🐞 Vision API</h1>
+    <nav><a href="/docs">/docs</a> · <a href="/metadata">/metadata</a> · <a href="/health">/health</a></nav>
+  </header>
+
+  <div class="card">
+    <h3>Probar /predict</h3>
+    <input type="file" id="file" accept="image/*"/>
+    <button id="btn">Enviar</button>
+    <small>Se envía como <code>multipart/form-data</code> con clave <code>file</code>.</small>
+  </div>
+
+  <div class="card">
+    <h3>Resultado</h3>
+    <div id="out">—</div>
+  </div>
+
+<script>
+const $ = s => document.querySelector(s);
+$("#btn").onclick = async () => {
+  const f = $("#file").files[0];
+  if(!f){ $("#out").textContent = "Elige una imagen primero."; return; }
+  const fd = new FormData(); fd.append("file", f);
+  $("#out").textContent = "Procesando...";
+  try{
+    const r = await fetch("/predict", { method:"POST", body: fd });
+    const j = await r.json();
+    $("#out").textContent = JSON.stringify(j,null,2);
+  }catch(e){ $("#out").textContent = "Error: " + e; }
+};
+</script>
+</body>
+</html>
