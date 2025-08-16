@@ -132,15 +132,16 @@ Respuesta típica:
 
 ## 5) Cómo probar (curl / Postman)
 
-curl — multipart
-
-curl -sS -X POST https://vision-api-ml.onrender.com/predict \
+### 5.1 – curl (multipart / archivo)
+```bash
+curl -sS -X POST "https://vision-api-ml.onrender.com/predict" \
   -H "accept: application/json" \
-  -F "file=@ruta/a/tu_imagen.jpg"
+  -F "file=@/ruta/a/tu_imagen.jpg"
+```
 
-curl — JSON/base64 con Python estándar
-
-
+### 5.2 – JSON/base64 (sin instalar nada extra)
+Una sola celda con Python estándar
+```
 python - <<'PY'
 import base64, json, pathlib, urllib.request
 img = "ruta/a/tu_imagen.jpg"
@@ -152,6 +153,7 @@ req = urllib.request.Request(
 )
 print(urllib.request.urlopen(req, timeout=60).read().decode())
 PY
+```
 
 Postman
 
