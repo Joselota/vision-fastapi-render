@@ -29,6 +29,7 @@ curl -sS -X POST "https://vision-api-ml.onrender.com/predict" \
 
 ### Predicción (JSON: imagen en base64)
 base64 -i /ruta/a/imagen.jpg | tr -d '\n' > img.b64
+
 curl -sS -X POST "https://vision-api-ml.onrender.com/predict_json" \
   -H "Content-Type: application/json" \
   -d "{\"image_b64\":\"$(cat img.b64)\"}"
