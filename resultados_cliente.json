@@ -1,0 +1,66 @@
+[
+  {
+    "req": 1,
+    "endpoint": "/predict",
+    "elapsed_ms": 14528.690516999632,
+    "input": {
+      "filename": "632185ec7f925c3d.jpg",
+      "size_bytes": 104652,
+      "mime": "image/jpeg",
+      "sha256_16": "747798eae00f2154"
+    },
+    "output": {
+      "label": "Butterfly",
+      "proba": {
+        "Bee": 0.10135599970817566,
+        "Ant": 0.3184950053691864,
+        "Butterfly": 0.3660520017147064,
+        "Ladybug": 0.21409699320793152
+      },
+      "model_version": "1.0.0"
+    }
+  },
+  {
+    "req": 2,
+    "endpoint": "/predict",
+    "elapsed_ms": 1532.9403989962884,
+    "input": {
+      "filename": "4827d395bbb69e38.jpg",
+      "size_bytes": 173863,
+      "mime": "image/jpeg",
+      "sha256_16": "1b9959fd7982db36"
+    },
+    "output": {
+      "label": "Ant",
+      "proba": {
+        "Bee": 0.0002859999949578196,
+        "Ant": 0.9981300234794617,
+        "Butterfly": 0.000155999994603917,
+        "Ladybug": 0.0014280000468716025
+      },
+      "model_version": "1.0.0"
+    }
+  },
+  {
+    "req": 3,
+    "endpoint": "/predict_json",
+    "elapsed_ms": 1731.795781000983,
+    "b64_len": 398872,
+    "input": {
+      "filename": "a41d46815d597df0.jpg",
+      "size_bytes": 299154,
+      "mime": "image/jpeg",
+      "sha256_16": "53dfed114df10513"
+    },
+    "output": {
+      "label": "Ladybug",
+      "proba": {
+        "Bee": 0.030372999608516693,
+        "Ant": 0.2734000086784363,
+        "Butterfly": 0.003611000021919608,
+        "Ladybug": 0.6926159858703613
+      },
+      "model_version": "1.0.0"
+    }
+  }
+]
