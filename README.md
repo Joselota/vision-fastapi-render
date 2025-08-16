@@ -114,7 +114,7 @@ pip install -r requirements.txt
 |   POST | `/predict_json` | Predicción vía **JSON** con imagen en **base64** |
 
 Esquema predict_json
-```{
+{
   "image_b64": "<cadena base64 de la imagen>"
 }
 
@@ -128,7 +128,7 @@ Respuesta típica:
     "Ladybug": 0.01
   },
   "model_version": "1.0.0"
-}```
+}
 
 ## 5) Cómo probar (curl / Postman)
 
