@@ -4,7 +4,7 @@ python-multipart==0.0.20
 pillow==11.3.0
 tensorflow-cpu==2.20.0
 ml-dtypes==0.5.1
-numpy>=1.26.4,<2.0
+numpy==1.26.4
 h5py>=3.10.0
 
 
