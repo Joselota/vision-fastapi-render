@@ -1,10 +1,12 @@
-fastapi==0.116.1
-uvicorn[standard]==0.35.0
-python-multipart==0.0.20
-pillow==11.3.0
-tensorflow-cpu==2.13.0
-keras==2.13.1
-numpy==1.24.3
-h5py>=3.10.0
+# API
+fastapi==0.95.2         # usa Pydantic v1 y no exige typing-extensions nuevas
+uvicorn[standard]==0.23.2
+pydantic==1.10.13
+python-multipart==0.0.6
+pillow==9.5.0
 
-
+# ML
+tensorflow-cpu==2.12.0  # stack Keras 2.12
+keras==2.12.0
+numpy==1.23.5           # compat oficial con TF 2.12
+h5py==3.8.0             # seguro con TF 2.12
