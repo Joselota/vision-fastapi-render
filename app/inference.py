@@ -12,7 +12,7 @@ try:
 except ImportError:
     from keras.applications.mobilenet_v2 import preprocess_input
 
-MODEL_PATH = Path(os.getenv("MODEL_PATH", "models/modelo.h5"))
+MODEL_PATH = Path(os.getenv("MODEL_PATH", "models/modelo_insectos.h5"))
 CLASSES_PATH = Path(os.getenv("CLASSES_PATH", "models/classes.json"))
 MODEL_VERSION = os.getenv("MODEL_VERSION", "1.0.0")
 
